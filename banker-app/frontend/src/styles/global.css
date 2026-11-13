@@ -1,0 +1,357 @@
+/* ==========================================
+   UPIShield Banker Application — Global Styles
+   Dark navy fintech theme
+   ========================================== */
+
+/* ---------- CSS Variables ---------- */
+:root {
+  /* Primary palette */
+  --color-bg-primary: #0a0e1a;
+  --color-bg-secondary: #111827;
+  --color-bg-panel: #1a2236;
+  --color-bg-card: #1e293b;
+  --color-bg-hover: #243049;
+
+  /* Accent colors */
+  --color-accent-cyan: #06b6d4;
+  --color-accent-blue: #3b82f6;
+  --color-accent-indigo: #6366f1;
+
+  /* Status colors */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #0ea5e9;
+
+  /* Text */
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+
+  /* Borders */
+  --color-border: #2a3a52;
+  --color-border-light: #334155;
+
+  /* Shadows */
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-glow-cyan: 0 0 20px rgba(6, 182, 212, 0.15);
+  --shadow-glow-blue: 0 0 20px rgba(59, 130, 246, 0.15);
+
+  /* Spacing */
+  --sidebar-width: 260px;
+  --topbar-height: 64px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+}
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  color: inherit;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* ---------- Utility Classes ---------- */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-1 {
+  gap: 8px;
+}
+
+.gap-2 {
+  gap: 12px;
+}
+
+.gap-3 {
+  gap: 16px;
+}
+
+.gap-4 {
+  gap: 24px;
+}
+
+.grid {
+  display: grid;
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-light);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ---------- Loading Spinner ---------- */
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--color-border-light);
+  border-top-color: var(--color-accent-cyan);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Fade-in animation ---------- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* ---------- Pulse animation for live indicators ---------- */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* ---------- Modal Overlay & Content ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.modal-content {
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 720px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-card);
+}
+.modal-lg { max-width: 800px; }
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+.modal-header h3 { margin: 0; font-size: 18px; color: var(--color-text-primary); }
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+.modal-close:hover { background: var(--color-bg-hover); color: var(--color-text-primary); }
+.modal-body { padding: 24px; }
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ---------- Customer / Transaction Detail Grid ---------- */
+.customer-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.detail-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+.detail-card:hover { border-color: var(--color-accent-cyan); }
+.detail-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--color-bg-hover);
+  border-radius: var(--radius-sm);
+  color: var(--color-accent-cyan);
+  flex-shrink: 0;
+}
+.detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.detail-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted);
+}
+.detail-value {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  word-break: break-word;
+}
+
+/* ---------- Status Summary Bar ---------- */
+.status-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 20px;
+}
+.status-summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 20px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  min-width: 90px;
+  flex: 1;
+}
+.status-summary-item.success { border-color: var(--color-success); }
+.status-summary-item.failed { border-color: var(--color-danger); }
+.status-summary-item.pending { border-color: var(--color-warning); }
+.status-summary-item.processing { border-color: var(--color-accent-blue); }
+.status-summary-item.unknown { border-color: var(--color-text-muted); }
+.status-summary-count {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.status-summary-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+.field-error {
+  display: block;
+  font-size: 12px;
+  color: var(--color-danger);
+  margin-top: 4px;
+}
+.simulator-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
+  color: var(--color-danger);
+}
