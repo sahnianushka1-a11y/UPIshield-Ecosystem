@@ -1,67 +1,29 @@
 /**
- * Transaction mock API.
- * Provides simulated transaction data with filtering support.
+ * Transaction service — communicates with the Bank backend.
  *
- * All data comes from the shared BankerContext state,
- * so transactions are visible across all pages.
+ * Uses the centralized api.js axios instance.
+ * All requests go to VITE_BANK_API_URL (http://localhost:8001).
  */
 
-import { useBanker } from '../context/BankerContext';
-
-/* ============================================================
-   HOOK VERSION — for use inside components
-   ============================================================ */
-
-export function useTransactions() {
-  const { getTransactions } = useBanker();
-  const transactions = getTransactions();
-
-  const getAll = (filters = {}) => {
-    let filtered = [...transactions];
-    if (filters.status) {
-      filtered = filtered.filter((t) => t.status === filters.status);
-    }
-    if (filters.search) {
-      const q = filters.search.toLowerCase();
-      filtered = filtered.filter(
-        (t) =>
-          t.id.toLowerCase().includes(q) ||
-          (t.sender || '').toLowerCase().includes(q) ||
-          (t.receiver || '').toLowerCase().includes(q) ||
-          (t.senderAccount || '').toLowerCase().includes(q) ||
-          (t.receiverAccount || '').toLowerCase().includes(q)
-      );
-    }
-    return filtered;
-  };
-
-  const getById = (id) => transactions.find((t) => t.id === id) || null;
-
-  return { transactions, getAll, getById };
-}
-
-/* ============================================================
-   STATIC VERSION — for backward compatibility
-   In production these would be HTTP calls to the backend.
-   ============================================================ */
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import api from './api';
 
 /**
- * Returns all transactions from the shared context state.
+ * Returns all transactions, optionally filtered by status and search.
  */
 export const getAllTransactions = async (filters = {}) => {
-  await delay(700);
-  // In production: const res = await api.get('/transactions', { params: filters });
-  // For now, we return a placeholder. The Transactions page uses
-  // the hook version which has live state.
-  return [];
+  const params = {};
+  if (filters.status) params.status = filters.status;
+  if (filters.search) params.search = filters.search;
+  if (filters.date) params.date = filters.date;
+  const res = await api.get('/transactions/', { params });
+  return res.data;
 };
 
 /**
  * Returns a single transaction by ID.
  */
 export const getTransactionById = async (id) => {
-  await delay(400);
-  return null;
+  const res = await api.get(`/transactions/${id}`);
+  return res.data;
 };
+

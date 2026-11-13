@@ -1,21 +1,37 @@
 /**
  * Transactions page — list, search, filter, and view details.
  *
- * Uses the shared BankerContext via useTransactions() hook so all
- * transactions are visible across the application.
+ * Uses the real backend API via transactionService.
  */
 
-import { useState, useMemo } from 'react';
-import { useTransactions } from '../services/transactionService';
+import { useState, useMemo, useEffect } from 'react';
+import { getAllTransactions } from '../services/transactionService';
 import StatusBadge from '../components/StatusBadge';
 import { Search, Filter, X, Eye, IndianRupee, Clock, Route, AlertCircle, UserRound } from 'lucide-react';
 
 export default function Transactions() {
-  const { transactions } = useTransactions();
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [dateFilter, setDateFilter] = useState('');
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+
+  useEffect(() => {
+    loadTransactions();
+  }, []);
+
+  async function loadTransactions() {
+    setLoading(true);
+    try {
+      const data = await getAllTransactions();
+      setTransactions(data);
+    } catch (err) {
+      console.error('Failed to load transactions:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const statusCounts = useMemo(() => {
     const counts = { ALL: transactions.length, SUCCESS: 0, FAILED: 0, PENDING: 0, PROCESSING: 0, UNKNOWN: 0 };
@@ -29,12 +45,14 @@ export default function Transactions() {
     if (dateFilter) result = result.filter((t) => t.timestamp.startsWith(dateFilter));
     if (search) {
       const q = search.toLowerCase();
-      result = result.filter((t) => t.id.toLowerCase().includes(q) || (t.sender || '').toLowerCase().includes(q) || (t.receiver || '').toLowerCase().includes(q) || (t.senderAccount || '').toLowerCase().includes(q) || (t.receiverAccount || '').toLowerCase().includes(q));
+      result = result.filter((t) => t.id.toLowerCase().includes(q) || (t.sender || '').toLowerCase().includes(q) || (t.receiver || '').toLowerCase().includes(q) || (t.sender_account || '').toLowerCase().includes(q) || (t.receiver_account || '').toLowerCase().includes(q));
     }
     return result;
   }, [transactions, search, statusFilter, dateFilter]);
 
   const handleCloseModal = () => { setSelectedTransaction(null); };
+
+  if (loading) return <div className="page-content"><div className="loading-center"><div className="spinner" /><p>Loading transactions...</p></div></div>;
 
   return (
     <div className="page-content fade-in">
@@ -83,13 +101,13 @@ export default function Transactions() {
                 filtered.map((t) => (
                   <tr key={t.id}>
                     <td><code>{t.id}</code></td>
-                    <td><span title={t.senderAccount}>{t.sender || t.senderAccount}</span></td>
-                    <td><span title={t.receiverAccount}>{t.receiver || t.receiverAccount}</span></td>
+                    <td><span title={t.sender_account}>{t.sender || t.sender_account}</span></td>
+                    <td><span title={t.receiver_account}>{t.receiver || t.receiver_account}</span></td>
                     <td>₹{t.amount.toLocaleString('en-IN')}</td>
                     <td>{t.route}</td>
                     <td><StatusBadge status={t.status} /></td>
                     <td style={{ fontSize: 12 }}>{t.timestamp}</td>
-                    <td>{t.failureReason ? <span style={{ color: 'var(--color-danger)', fontSize: 12 }}>{t.failureReason}</span> : <span style={{ color: 'var(--color-text-muted)' }}>—</span>}</td>
+                    <td>{t.failure_reason ? <span style={{ color: 'var(--color-danger)', fontSize: 12 }}>{t.failure_reason}</span> : <span style={{ color: 'var(--color-text-muted)' }}>—</span>}</td>
                     <td><button className="btn btn-sm btn-outline" onClick={() => setSelectedTransaction(t)} title="View Details"><Eye size={14} /></button></td>
                   </tr>
                 ))
@@ -129,15 +147,15 @@ export default function Transactions() {
                 </div>
                 <div className="detail-card">
                   <div className="detail-icon"><UserRound size={20} /></div>
-                  <div className="detail-info"><span className="detail-label">Sender</span><span className="detail-value"><strong>{selectedTransaction.sender}</strong><br /><code>{selectedTransaction.senderAccount}</code></span></div>
+                  <div className="detail-info"><span className="detail-label">Sender</span><span className="detail-value"><strong>{selectedTransaction.sender}</strong><br /><code>{selectedTransaction.sender_account}</code></span></div>
                 </div>
                 <div className="detail-card">
                   <div className="detail-icon"><UserRound size={20} /></div>
-                  <div className="detail-info"><span className="detail-label">Receiver</span><span className="detail-value"><strong>{selectedTransaction.receiver}</strong><br /><code>{selectedTransaction.receiverAccount}</code></span></div>
+                  <div className="detail-info"><span className="detail-label">Receiver</span><span className="detail-value"><strong>{selectedTransaction.receiver}</strong><br /><code>{selectedTransaction.receiver_account}</code></span></div>
                 </div>
                 <div className="detail-card">
                   <div className="detail-icon"><AlertCircle size={20} /></div>
-                  <div className="detail-info"><span className="detail-label">Failure Reason</span><span className="detail-value" style={{ color: selectedTransaction.failureReason ? 'var(--color-danger)' : 'var(--color-text-muted)' }}>{selectedTransaction.failureReason || 'None'}</span></div>
+                  <div className="detail-info"><span className="detail-label">Failure Reason</span><span className="detail-value" style={{ color: selectedTransaction.failure_reason ? 'var(--color-danger)' : 'var(--color-text-muted)' }}>{selectedTransaction.failure_reason || 'None'}</span></div>
                 </div>
               </div>
             </div>

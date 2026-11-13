@@ -4,10 +4,12 @@
  * Wraps the app so every component can access the current user
  * and the login/logout functions.  Token and user data are stored
  * in localStorage so they survive page refreshes.
+ *
+ * Uses the real backend API via api.js.
  */
 
 import { createContext, useContext, useState, useEffect } from 'react';
-import { mockAuth } from '../services/mockApi';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -27,14 +29,19 @@ export function AuthProvider({ children }) {
 
   // ---------- Login ----------
   const login = async (email, password) => {
-    const result = await mockAuth.login(email, password);
-    if (result.success) {
-      localStorage.setItem('banker_token', result.token);
-      localStorage.setItem('banker_user', JSON.stringify(result.user));
-      setUser(result.user);
-      return { success: true };
+    try {
+      const res = await api.post('/auth/login', { email, password });
+      const data = res.data;
+      if (data.success) {
+        localStorage.setItem('banker_token', data.token);
+        localStorage.setItem('banker_user', JSON.stringify(data.user));
+        setUser(data.user);
+        return { success: true };
+      }
+      return { success: false, message: data.message || 'Login failed' };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.detail || 'Login failed. Please check credentials.' };
     }
-    return { success: false, message: result.message };
   };
 
   // ---------- Logout ----------

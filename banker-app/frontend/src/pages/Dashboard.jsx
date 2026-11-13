@@ -1,11 +1,7 @@
 /**
  * Dashboard page (Overview).
  *
- * Centralized dashboard displaying key banking metrics,
- * recent activity, service health overview, and quick actions.
- *
- * Uses the shared BankerContext so active alert counts and
- * recent activity stay in sync with failure injection/recovery.
+ * Uses the real backend API via dashboardService and infrastructureService.
  */
 
 import { useState, useEffect } from 'react';
@@ -24,18 +20,36 @@ import {
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
-import { useBanker, computeDashboardStats } from '../context/BankerContext';
+import { getDashboardStats } from '../services/dashboardService';
+import { getInfrastructureHealth } from '../services/infrastructureService';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { state } = useBanker();
   const [stats, setStats] = useState(null);
+  const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setStats(computeDashboardStats(state));
-    setLoading(false);
-  }, [state]);
+    Promise.all([loadStats(), loadServices()]).finally(() => setLoading(false));
+  }, []);
+
+  async function loadStats() {
+    try {
+      const data = await getDashboardStats();
+      setStats(data);
+    } catch (err) {
+      console.error('Failed to load dashboard stats:', err);
+    }
+  }
+
+  async function loadServices() {
+    try {
+      const data = await getInfrastructureHealth();
+      setServices(data);
+    } catch (err) {
+      console.error('Failed to load infrastructure:', err);
+    }
+  }
 
   if (loading) {
     return (
@@ -112,7 +126,7 @@ export default function Dashboard() {
             </button>
           </div>
           <div className="health-list">
-            {state.infrastructureServices.map((service) => (
+            {services.map((service) => (
               <div key={service.id} className="health-item">
                 <div className="health-item-info">
                   <span className="health-item-name">{service.name}</span>

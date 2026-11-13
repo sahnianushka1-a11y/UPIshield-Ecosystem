@@ -1,16 +1,14 @@
 /**
  * Failure Simulator page — inject and recover simulated failures.
  *
- * Uses the shared BankerContext so failures are visible across
- * all pages (Infrastructure, Dashboard, etc.).
+ * Uses the real backend API via failureService.
  */
 
-import { useState } from 'react';
-import { useBanker } from '../context/BankerContext';
-import StatusBadge from '../components/StatusBadge';
+import { useState, useEffect } from 'react';
+import { getFailureStatus, injectFailure, recoverService } from '../services/failureService';
 import { AlertTriangle, RotateCcw, Zap, Server, CheckCircle2 } from 'lucide-react';
 
-const failureTypes = ['API timeout', 'API unavailable', 'Server error', 'Network interruption', 'Response lost'];
+const failureTypes = ['API_TIMEOUT', 'API_UNAVAILABLE', 'SERVER_ERROR', 'NETWORK_INTERRUPTION', 'RESPONSE_LOST'];
 
 const serviceLabels = {
   'payment-api': 'Payment API',
@@ -22,29 +20,60 @@ const serviceLabels = {
 };
 
 export default function FailureSimulator() {
-  const { state, injectFailure: dispatchInject, recoverService: dispatchRecover } = useBanker();
+  const [activeFailures, setActiveFailures] = useState([]);
+  const [allServices, setAllServices] = useState([]);
   const [selectedService, setSelectedService] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [loadError, setLoadError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const services = state.infrastructureServices.map((s) => s.id);
-  const activeFailures = state.activeFailures;
+  useEffect(() => {
+    loadStatus();
+  }, []);
 
-  const handleInject = () => {
+  async function loadStatus() {
+    setLoading(true);
+    setLoadError('');
+    try {
+      const data = await getFailureStatus();
+      setAllServices(data.all_services);
+      setActiveFailures(data.active_failures);
+    } catch (error) {
+      console.error('Failed to load failure status:', error);
+      setLoadError('Unable to load services. Start the Banker backend on port 8001 and retry.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleInject = async () => {
     if (!selectedService || !selectedType) {
       setMessage({ type: 'error', text: 'Please select a service and failure type.' });
       return;
     }
-    dispatchInject(selectedService, selectedType);
-    setMessage({ type: 'success', text: `Simulated ${selectedType} injected on ${serviceLabels[selectedService] || selectedService}.` });
-    setSelectedService('');
-    setSelectedType('');
+    try {
+      await injectFailure(selectedService, selectedType);
+      setMessage({ type: 'success', text: `Simulated ${selectedType} injected on ${serviceLabels[selectedService] || selectedService}.` });
+      await loadStatus();
+      setSelectedService('');
+      setSelectedType('');
+    } catch {
+      setMessage({ type: 'error', text: 'Failed to inject failure.' });
+    }
   };
 
-  const handleRecover = (serviceId) => {
-    dispatchRecover(serviceId);
-    setMessage({ type: 'success', text: `${serviceLabels[serviceId] || serviceId} recovered.` });
+  const handleRecover = async (failureId) => {
+    try {
+      await recoverService(failureId);
+      setMessage({ type: 'success', text: `Service recovered.` });
+      loadStatus();
+    } catch {
+      setMessage({ type: 'error', text: 'Failed to recover service.' });
+    }
   };
+
+  if (loading) return <div className="page-content"><div className="loading-center"><div className="spinner" /><p>Loading failure status...</p></div></div>;
 
   return (
     <div className="page-content fade-in">
@@ -58,6 +87,12 @@ export default function FailureSimulator() {
       </div>
 
       {message.text && <div className={`message-banner ${message.type === 'success' ? 'message-success' : 'message-error'}`}>{message.text}</div>}
+      {loadError && (
+        <div className="message-banner message-error">
+          {loadError}
+          <button className="btn btn-sm btn-outline" style={{ marginLeft: 12 }} onClick={loadStatus}>Retry</button>
+        </div>
+      )}
 
       <section className="panel">
         <div className="panel-heading"><h3><Zap size={18} style={{ marginRight: 8 }} /> Inject Failure</h3></div>
@@ -66,7 +101,7 @@ export default function FailureSimulator() {
             <label>Select Service</label>
             <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)}>
               <option value="">-- Choose service --</option>
-              {services.map((s) => <option key={s} value={s}>{serviceLabels[s] || s}</option>)}
+              {allServices.map((s) => <option key={s} value={s}>{serviceLabels[s] || s}</option>)}
             </select>
           </div>
           <div className="form-group">
@@ -88,8 +123,8 @@ export default function FailureSimulator() {
           <div className="failures-list">
             {activeFailures.map((f) => (
               <div key={f.id} className="failure-item">
-                <div><strong>{f.serviceName}</strong><span>{f.failureType}</span></div>
-                <button className="btn btn-sm btn-success" onClick={() => handleRecover(f.serviceId)}><RotateCcw size={14} style={{ marginRight: 4 }} /> Recover</button>
+                <div><strong>{f.service_name}</strong><span>{f.failure_type}</span></div>
+                <button className="btn btn-sm btn-success" onClick={() => handleRecover(f.id)}><RotateCcw size={14} style={{ marginRight: 4 }} /> Recover</button>
               </div>
             ))}
           </div>

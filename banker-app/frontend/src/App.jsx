@@ -7,7 +7,6 @@
 
 import { BrowserRouter, Routes, Route, Navigate, useLocation, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { BankerProvider } from './context/BankerContext';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import Login from './pages/Login';
@@ -74,9 +73,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <BankerProvider>
-          <RouteRenderer />
-        </BankerProvider>
+        <RouteRenderer />
       </AuthProvider>
     </BrowserRouter>
   );

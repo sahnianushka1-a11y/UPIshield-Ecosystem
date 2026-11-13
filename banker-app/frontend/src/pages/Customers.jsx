@@ -1,14 +1,13 @@
 /**
  * Customers page — list, search, filter, create, toggle status, and view details.
  *
- * Uses the shared BankerContext via useCustomers() hook so all
- * changes are immediately visible across the application.
+ * Uses the real backend API via customerService.
  */
 
-import { useState, useMemo } from 'react';
-import { useCustomers } from '../services/customerService';
+import { useState, useMemo, useEffect } from 'react';
+import { getAllCustomers, createCustomer, updateCustomerStatus } from '../services/customerService';
 import StatusBadge from '../components/StatusBadge';
-import { Search, Plus, UserPlus, ToggleLeft, ToggleRight, X, Eye, Phone, Mail, Calendar, IndianRupee, UserRound } from 'lucide-react';
+import { Search, Plus, X, Eye, Phone, Mail, Calendar, IndianRupee, UserRound } from 'lucide-react';
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -19,7 +18,8 @@ function isValidPhone(phone) {
 }
 
 export default function Customers() {
-  const { customers, create, updateStatus } = useCustomers();
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -31,17 +31,34 @@ export default function Customers() {
   const [formDeposit, setFormDeposit] = useState('');
   const [formErrors, setFormErrors] = useState({});
 
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+
+  async function loadCustomers() {
+    setLoading(true);
+    try {
+      const data = await getAllCustomers();
+      setCustomers(data);
+    } catch (err) {
+      console.error('Failed to load customers:', err);
+      setMessage({ type: 'error', text: 'Failed to load customers. Is the backend running?' });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const filtered = useMemo(() => {
     let result = customers;
     if (statusFilter !== 'ALL') result = result.filter((c) => c.status === statusFilter);
     if (search) {
       const q = search.toLowerCase();
-      result = result.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.accountNumber.toLowerCase().includes(q) || c.phone.includes(q));
+      result = result.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.account_number.toLowerCase().includes(q) || c.phone.includes(q));
     }
     return result;
   }, [customers, search, statusFilter]);
 
-  const handleCreate = (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
     const errors = {};
     if (!formName.trim()) errors.name = 'Name is required.';
@@ -52,22 +69,30 @@ export default function Customers() {
     if (!formDeposit || Number(formDeposit) < 0) errors.deposit = 'Initial deposit must be 0 or more.';
     if (Object.keys(errors).length > 0) { setFormErrors(errors); return; }
     try {
-      const newCustomer = create({ name: formName.trim(), email: formEmail.trim(), phone: formPhone.trim(), initialDeposit: Number(formDeposit) });
+      const newCustomer = await createCustomer({ name: formName.trim(), email: formEmail.trim(), phone: formPhone.trim(), initialDeposit: Number(formDeposit) });
+      setCustomers((prev) => [newCustomer, ...prev]);
       setMessage({ type: 'success', text: `Customer ${newCustomer.name} created successfully!` });
       setFormName(''); setFormEmail(''); setFormPhone(''); setFormDeposit('');
       setFormErrors({}); setShowCreateForm(false);
-    } catch (error) {
-      setMessage({ type: 'error', text: error.message === 'Invalid customer details' ? 'Please enter valid customer details.' : 'Failed to create customer.' });
+    } catch {
+      setMessage({ type: 'error', text: error.response?.data?.detail || 'Failed to create customer.' });
     }
   };
 
-  const handleToggleStatus = (id, currentStatus) => {
+  const handleToggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    updateStatus(id, newStatus);
-    setMessage({ type: 'success', text: `Customer ${newStatus.toLowerCase()} successfully.` });
+    try {
+      await updateCustomerStatus(id, newStatus);
+      setCustomers((prev) => prev.map((c) => c.id === id ? { ...c, status: newStatus } : c));
+      setMessage({ type: 'success', text: `Customer ${newStatus.toLowerCase()} successfully.` });
+    } catch {
+      setMessage({ type: 'error', text: 'Failed to update customer status.' });
+    }
   };
 
   const handleCloseModal = () => { setSelectedCustomer(null); };
+
+  if (loading) return <div className="page-content"><div className="loading-center"><div className="spinner" /><p>Loading customers...</p></div></div>;
 
   return (
     <div className="page-content fade-in">
@@ -78,7 +103,7 @@ export default function Customers() {
 
       {showCreateForm && (
         <section className="panel fade-in">
-          <div className="panel-heading"><h3><UserPlus size={18} style={{ marginRight: 8 }} /> Create New Customer</h3></div>
+          <div className="panel-heading"><h3><Plus size={18} style={{ marginRight: 8 }} /> Create New Customer</h3></div>
           <form onSubmit={handleCreate} className="create-form">
             <div className="form-row">
               <div className="form-group">
@@ -139,14 +164,14 @@ export default function Customers() {
                 filtered.map((c) => (
                   <tr key={c.id}>
                     <td><div className="customer-cell"><div className="customer-avatar">{c.name.charAt(0)}</div><div><strong>{c.name}</strong><span>{c.email}</span></div></div></td>
-                    <td><code>{c.accountNumber}</code></td>
+                    <td><code>{c.account_number}</code></td>
                     <td>₹{c.balance.toLocaleString('en-IN')}</td>
                     <td>{c.phone}</td>
                     <td><StatusBadge status={c.status} /></td>
                     <td>
                       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                         <button className="btn btn-sm btn-outline" onClick={() => setSelectedCustomer(c)} title="View Details"><Eye size={14} /></button>
-                        <button className="btn btn-sm btn-outline" onClick={() => handleToggleStatus(c.id, c.status)} title={c.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}>{c.status === 'ACTIVE' ? <ToggleLeft size={16} /> : <ToggleRight size={16} />}</button>
+                        <button className="btn btn-sm btn-outline" onClick={() => handleToggleStatus(c.id, c.status)} title={c.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}>{c.status === 'ACTIVE' ? <X size={16} /> : <Plus size={16} />}</button>
                       </div>
                     </td>
                   </tr>
@@ -180,7 +205,7 @@ export default function Customers() {
                 </div>
                 <div className="detail-card">
                   <div className="detail-icon"><IndianRupee size={20} /></div>
-                  <div className="detail-info"><span className="detail-label">Account Number</span><span className="detail-value"><code>{selectedCustomer.accountNumber}</code></span></div>
+                  <div className="detail-info"><span className="detail-label">Account Number</span><span className="detail-value"><code>{selectedCustomer.account_number}</code></span></div>
                 </div>
                 <div className="detail-card">
                   <div className="detail-icon"><IndianRupee size={20} /></div>
@@ -188,7 +213,7 @@ export default function Customers() {
                 </div>
                 <div className="detail-card">
                   <div className="detail-icon"><Calendar size={20} /></div>
-                  <div className="detail-info"><span className="detail-label">Created</span><span className="detail-value">{selectedCustomer.createdAt}</span></div>
+                  <div className="detail-info"><span className="detail-label">Created</span><span className="detail-value">{selectedCustomer.created_at}</span></div>
                 </div>
                 <div className="detail-card">
                   <div className="detail-icon"><StatusBadge status={selectedCustomer.status} /></div>

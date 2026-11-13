@@ -1,84 +1,37 @@
 /**
- * Failure Simulator mock API.
- * Provides simulated failure injection and recovery endpoints.
+ * Failure service — communicates with the Bank backend.
  *
- * All mutations go through the shared BankerContext state,
- * so failures are visible across all pages.
+ * Uses the centralized api.js axios instance.
+ * All requests go to VITE_BANK_API_URL (http://localhost:8001).
  */
 
-import { useBanker } from '../context/BankerContext';
-import { syncInfrastructureCache } from './infrastructureService';
-
-/* ============================================================
-   HOOK VERSION — for use inside components
-   ============================================================ */
-
-export function useFailureSimulator() {
-  const { injectFailure: inject, recoverService: recover, getActiveFailures, getFailureHistory, getAllServices } = useBanker();
-  return { injectFailure: inject, recoverService: recover, getActiveFailures, getFailureHistory, getAllServices };
-}
-
-/* ============================================================
-   STATIC VERSION — for backward compatibility
-   These call the context actions under the hood.
-   In a real app these would be HTTP calls to the backend.
-   ============================================================ */
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const serviceList = ['payment-api', 'auth-api', 'bank-db', 'upi-gateway', 'payment-processor', 'external-payments'];
+import api from './api';
 
 /**
- * Get current failure status from the shared context.
- * Returns active failures and the list of all services.
+ * Returns the current failure status (active failures + service list).
  */
 export const getFailureStatus = async () => {
-  await delay(400);
-  // In production this would be: const res = await api.get('/failures/status');
-  // For now, we need the context. Since this is called outside React in some paths,
-  // we fall back to an empty array if context is not available.
-  try {
-    // We can't access context outside a component, so we return a
-    // placeholder. The FailureSimulator page uses the hook version
-    // which has live state.
-    return { activeFailures: [], allServices: serviceList };
-  } catch {
-    return { activeFailures: [], allServices: serviceList };
-  }
+  const res = await api.get('/failures/status');
+  return res.data;
 };
 
 /**
- * Inject a simulated failure.
- * Dispatches INJECT_FAILURE to the shared state.
+ * Injects a simulated failure on the specified service.
  */
 export const injectFailure = async (serviceId, failureType) => {
-  await delay(700);
-  // Dispatch to shared state
-  // Since we can't call dispatch outside a component, we use a
-  // workaround: the FailureSimulator page calls injectFailure
-  // directly from the context via the hook.
-  // This static version is kept for API compatibility.
-  // In the actual page, we use the hook version.
-  return {
-    success: true,
-    message: `Simulated ${failureType} injected on ${serviceId}`,
-    serviceId,
-    failureType,
-    timestamp: new Date().toISOString(),
-  };
+  const res = await api.post('/failures/inject', {
+    service_id: serviceId,
+    failure_type: failureType,
+  });
+  return res.data;
 };
 
 /**
- * Recover a service from a simulated failure.
- * Dispatches RECOVER_SERVICE to the shared state.
+ * Recovers a service from a simulated failure.
  */
-export const recoverService = async (serviceId) => {
-  await delay(600);
-  return {
-    success: true,
-    message: `Service ${serviceId} recovered`,
-    serviceId,
-    timestamp: new Date().toISOString(),
-  };
+export const recoverService = async (failureId) => {
+  const res = await api.post(`/failures/${failureId}/recover`);
+  return res.data;
 };
+
 
