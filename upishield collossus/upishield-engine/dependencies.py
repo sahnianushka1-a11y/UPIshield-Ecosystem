@@ -170,13 +170,13 @@ def update_service_health(service_id, health):
         }
 
     allowed_states = [
-        "HEALTHY",
-        "DEGRADED",
-        "FAILED",
-        "RECOVERING",
-        "STANDBY"
-    ]
-
+    "HEALTHY",
+    "DEGRADED",
+    "FAILED",
+    "AT_RISK",
+    "RECOVERING",
+    "STANDBY"
+]
     health = health.upper()
 
     if health not in allowed_states:
