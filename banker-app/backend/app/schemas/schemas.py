@@ -75,6 +75,7 @@ class TransactionResponse(BaseModel):
     status: str
     route: str
     failure_reason: Optional[str] = None
+    description: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -130,6 +131,7 @@ class IntegrationEventResponse(BaseModel):
     failure_type: Optional[str] = None
     timestamp: str
     source: str
+    related_event_id: Optional[str] = None
 
 
 # ---------- Activity ----------

@@ -29,7 +29,8 @@ import {
 import "@xyflow/react/dist/style.css";
 import "./App.css";
 
-const ENGINE_URL = "http://localhost:8001";
+const ENGINE_URL =
+  import.meta.env.VITE_UPISHIELD_ENGINE_URL || "http://localhost:8003";
 
 const failureOptions = [
   {
@@ -133,6 +134,16 @@ function App() {
   const [selectedService, setSelectedService] = useState("sponsor_api");
 
   const [failureData, setFailureData] = useState(null);
+  const [analysisData, setAnalysisData] = useState(null);
+  const [analysisByService, setAnalysisByService] = useState({});
+  const [selectedAnalysisService, setSelectedAnalysisService] = useState(null);
+  const [impactData, setImpactData] = useState(null);
+  const [analysisErrors, setAnalysisErrors] = useState({});
+  const [analysisLoading, setAnalysisLoading] = useState({
+    cascade: false,
+    impact: false,
+    recovery: false,
+  });
 
   const [recoveryActionResult, setRecoveryActionResult] = useState(null);
 
@@ -142,6 +153,8 @@ function App() {
 
   const [error, setError] = useState("");
   const [connectionStatus, setConnectionStatus] = useState("CONNECTING");
+  const [integrationStatus, setIntegrationStatus] = useState(null);
+  const [pollingIntegration, setPollingIntegration] = useState(false);
 
   // ------------------------------------------
   // FETCH LIVE DEPENDENCY GRAPH
@@ -192,21 +205,152 @@ function App() {
       });
 
       setConnectionStatus("ONLINE");
-    } catch (err) {
+    } catch {
       setConnectionStatus("OFFLINE");
       setError(
-        "Cannot connect to UPIShield backend. Check whether port 8001 is running."
+        "Cannot connect to UPIShield backend. Check whether port 8003 is running."
       );
     }
   }, []);
 
+  const loadServiceAnalysis = useCallback(async (serviceId, source, failure) => {
+    const fetchAnalysis = async (url, fallbackMessage) => {
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.detail || data.message || fallbackMessage);
+        }
+        return { data };
+      } catch (err) {
+        return { error: err.message || fallbackMessage };
+      }
+    };
+
+    setAnalysisLoading({
+      cascade: true,
+      impact: true,
+      recovery: true,
+    });
+    setAnalysisErrors({});
+
+    const [cascadeResult, impactResult, recoveryResult] = await Promise.all([
+      fetchAnalysis(
+        `${ENGINE_URL}/cascade/${serviceId}`,
+        "Unable to load cascade analysis"
+      ),
+      fetchAnalysis(`${ENGINE_URL}/impact`, "Unable to load cascade impact"),
+      fetchAnalysis(
+        `${ENGINE_URL}/recovery/${serviceId}`,
+        "Unable to load recovery advice"
+      ),
+    ]);
+
+    const analysis = {
+      failure: {
+        event_id: failure.event_id || failure.failure_id,
+        service_id: serviceId,
+        service_name:
+          cascadeResult.data?.failed_service?.name || failure.service,
+        failure_type: failure.failure_type || "UNKNOWN",
+        severity: failure.severity || "HIGH",
+        status: "FAILED",
+        source,
+      },
+      cascade_analysis: cascadeResult.data || null,
+      recovery_advisor: recoveryResult.data || null,
+    };
+    setAnalysisData(analysis);
+    setAnalysisByService((current) => ({
+      ...current,
+      [serviceId]: analysis,
+    }));
+    setImpactData(impactResult.data || null);
+    setAnalysisErrors({
+      ...(cascadeResult.error ? { cascade: cascadeResult.error } : {}),
+      ...(impactResult.error ? { impact: impactResult.error } : {}),
+      ...(recoveryResult.error ? { recovery: recoveryResult.error } : {}),
+    });
+    setAnalysisLoading({
+      cascade: false,
+      impact: false,
+      recovery: false,
+    });
+  }, []);
+
+  const fetchIntegrationStatus = useCallback(async () => {
+    try {
+      const response = await fetch(`${ENGINE_URL}/integration/status`);
+      if (!response.ok) throw new Error("Unable to fetch integration status");
+      const data = await response.json();
+      setIntegrationStatus(data);
+      const bankerFailures = (data.active_failures || []).filter(
+        (failure) => failure.source === "BANKER_APP"
+      );
+      if (bankerFailures.length > 0) {
+        setSelectedAnalysisService((current) =>
+          bankerFailures.some(
+            (failure) => failure.graph_service === current
+          )
+            ? current
+            : bankerFailures[0].graph_service
+        );
+        await Promise.all(
+          bankerFailures.map((failure) =>
+            loadServiceAnalysis(
+              failure.graph_service,
+              "BANKER_APP",
+              failure
+            )
+          )
+        );
+      } else if (
+        !data.active_failures?.some(
+          (failure) => failure.source === "LOCAL_SIMULATION"
+        )
+      ) {
+        setAnalysisData(null);
+        setAnalysisByService({});
+        setSelectedAnalysisService(null);
+        setImpactData(null);
+      }
+    } catch (err) {
+      setIntegrationStatus((current) => ({
+        ...current,
+        banker_connection: "OFFLINE",
+        recent_sync_error: err.message,
+      }));
+    }
+  }, [loadServiceAnalysis]);
+
   useEffect(() => {
     fetchGraph();
+    fetchIntegrationStatus();
 
-    const interval = setInterval(fetchGraph, 3000);
+    const interval = setInterval(() => {
+      fetchGraph();
+      fetchIntegrationStatus();
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, [fetchGraph]);
+  }, [fetchGraph, fetchIntegrationStatus]);
+
+  const pollIntegration = async () => {
+    setPollingIntegration(true);
+    setError("");
+    try {
+      const response = await fetch(`${ENGINE_URL}/integration/poll`, {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Integration poll failed");
+      await Promise.all([fetchGraph(), fetchIntegrationStatus()]);
+    } catch (err) {
+      setError(err.message || "Could not poll Banker events");
+    } finally {
+      setPollingIntegration(false);
+    }
+  };
 
   // ------------------------------------------
   // INJECT FAILURE
@@ -217,6 +361,10 @@ function App() {
     setError("");
     setRecoveryActionResult(null);
     setFailureData(null);
+    setAnalysisByService({});
+    setSelectedAnalysisService(null);
+    setImpactData(null);
+    setAnalysisErrors({});
 
     try {
       const response = await fetch(`${ENGINE_URL}/events/failure`, {
@@ -241,8 +389,17 @@ function App() {
       // failure + cascade_analysis + recovery_advisor
 
       setFailureData(data);
+      setAnalysisData(data);
+      setAnalysisByService({
+        [service.id]: data,
+      });
+      setSelectedAnalysisService(service.id);
+      setImpactData(null);
 
-      await fetchGraph();
+      await Promise.all([
+        fetchGraph(),
+        loadServiceAnalysis(service.id, "LOCAL_SIMULATION", data.failure),
+      ]);
     } catch (err) {
       setError(err.message || "Could not inject failure");
     } finally {
@@ -255,7 +412,7 @@ function App() {
   // ------------------------------------------
 
   const requestRecovery = async () => {
-    const failedServiceId = failureData?.failure?.service_id;
+    const failedServiceId = displayedAnalysis?.failure?.service_id;
 
     if (!failedServiceId) {
       setError("Inject a failure before requesting recovery.");
@@ -313,6 +470,11 @@ function App() {
       }
 
       setFailureData(null);
+      setAnalysisData(null);
+      setAnalysisByService({});
+      setSelectedAnalysisService(null);
+      setImpactData(null);
+      setAnalysisErrors({});
       setRecoveryActionResult(null);
 
       await fetchGraph();
@@ -339,12 +501,14 @@ function App() {
     (node) => node.data.health === "HEALTHY"
   ).length;
 
-  const cascade = failureData?.cascade_analysis;
-  const recovery = failureData?.recovery_advisor;
+  const displayedAnalysis =
+    analysisByService[selectedAnalysisService] || analysisData || failureData;
+  const cascade = displayedAnalysis?.cascade_analysis;
+  const recovery = displayedAnalysis?.recovery_advisor;
 
   const recoveryResult = recoveryActionResult || recovery;
 
-  const failedService = failureData?.failure;
+  const failedService = displayedAnalysis?.failure;
 
   // ------------------------------------------
   // UI
@@ -490,6 +654,126 @@ function App() {
         </div>
       )}
 
+      <section
+        style={{
+          background: "#111827",
+          border: "1px solid #263449",
+          borderRadius: 16,
+          padding: 18,
+          marginBottom: 20,
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <div>
+            <h2 style={{ fontSize: 17, margin: 0 }}>Banker Event Integration</h2>
+            <p style={{ color: "#94a3b8", fontSize: 12, marginBottom: 0 }}>
+              Failure and recovery events are retrieved from Banker without modifying its database.
+            </p>
+          </div>
+          <button
+            onClick={pollIntegration}
+            disabled={pollingIntegration}
+            style={{
+              padding: "9px 13px",
+              borderRadius: 9,
+              background: "#1e3a5f",
+              color: "#fff",
+              border: "1px solid #334155",
+              cursor: "pointer",
+            }}
+          >
+            <RotateCcw size={14} style={{ marginRight: 6, verticalAlign: "middle" }} />
+            {pollingIntegration ? "Syncing..." : "Sync Now"}
+          </button>
+        </div>
+        {integrationStatus && (
+          <>
+            <p style={{ color: "#cbd5e1", fontSize: 12 }}>
+              <strong>BANKER APP</strong>
+              {" | "}Connection: <strong>{integrationStatus.banker_connection}</strong>
+              {" | "}Polling: {integrationStatus.polling_enabled ? "ACTIVE" : "INACTIVE"}
+              {" | "}Processed: {integrationStatus.processed_events}
+              {" | "}Skipped: {integrationStatus.skipped_events}
+              {" | "}Active Banker failures: {integrationStatus.active_banker_failures}
+            </p>
+            {integrationStatus.active_failures?.filter(
+              (failure) => failure.source === "BANKER_APP"
+            ).length > 0 && (
+              <div style={{ display: "grid", gap: 7, marginBottom: 10 }}>
+                <strong style={{ color: "#fca5a5", fontSize: 12 }}>
+                  Active Banker failures
+                </strong>
+                {integrationStatus.active_failures
+                  .filter((failure) => failure.source === "BANKER_APP")
+                  .map((failure) => (
+                    <button
+                      key={failure.event_id}
+                      onClick={() =>
+                        setSelectedAnalysisService(failure.graph_service)
+                      }
+                      style={{
+                        textAlign: "left",
+                        padding: "8px 10px",
+                        borderRadius: 8,
+                        border: "1px solid #334155",
+                        background:
+                          selectedAnalysisService === failure.graph_service
+                            ? "#1e3a5f"
+                            : "#172033",
+                        color: "#e2e8f0",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <strong>{failure.service}</strong>
+                      {" -> "}
+                      {failure.graph_service}
+                      <span style={{ color: "#fcd34d", fontSize: 11 }}>
+                        {" | "}Event ID: {failure.event_id}
+                      </span>
+                    </button>
+                  ))}
+              </div>
+            )}
+            <p style={{
+              color: integrationStatus.stale ? "#fca5a5" : "#86efac",
+              fontSize: 12,
+              marginTop: 0,
+            }}>
+              {integrationStatus.stale
+                ? "STALE / DISCONNECTED — graph may not reflect current Banker state."
+                : `Last synchronized: ${integrationStatus.last_successful_sync || "Not yet synchronized"}`}
+            </p>
+            {integrationStatus.recent_sync_error && (
+              <p style={{ color: "#fca5a5", fontSize: 12 }}>
+                Sync error: {integrationStatus.recent_sync_error}
+              </p>
+            )}
+            {integrationStatus.recent_events?.length > 0 && (
+              <div style={{ display: "grid", gap: 6 }}>
+                {integrationStatus.recent_events.slice(0, 5).map((event) => (
+                  <div
+                    key={`${event.event_id}-${event.result}`}
+                    style={{ color: "#cbd5e1", fontSize: 11 }}
+                  >
+                    <strong>BANKER APP — {event.result}</strong> — {event.event_type} / {event.service}
+                    {event.reason ? ` (${event.reason})` : ""}
+                  </div>
+                ))}
+              </div>
+            )}
+            {integrationStatus.recent_banker_recoveries?.length > 0 && (
+              <p style={{ color: "#86efac", fontSize: 11 }}>
+                Recent Banker recoveries:{" "}
+                {integrationStatus.recent_banker_recoveries
+                  .slice(0, 3)
+                  .map((event) => `${event.service} (${event.event_id})`)
+                  .join(", ")}
+              </p>
+            )}
+          </>
+        )}
+      </section>
+
       {/* MAIN LAYOUT */}
 
       <div
@@ -512,12 +796,13 @@ function App() {
         >
           <h2 style={{ fontSize: 17, display: "flex", gap: 9 }}>
             <Zap size={20} color="#f59e0b" />
-            Simulate Injected Failures
+            Local Simulation
           </h2>
 
           <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.6 }}>
-            Select an infrastructure service. UPIShield will analyse the
-            resulting simulated failure and recommend a recovery action.
+            <strong style={{ color: "#fbbf24" }}>LOCAL SIMULATION</strong>{" "}
+            only. This isolated test does not modify Banker infrastructure.
+            Banker-originated failures are synchronized automatically above.
           </p>
 
           <label style={{ fontSize: 12, color: "#94a3b8" }}>
@@ -672,7 +957,7 @@ function App() {
 
       {/* FAILURE AND CASCADE ANALYSIS */}
 
-      {failureData && (
+      {displayedAnalysis && (
         <section
           style={{
             marginTop: 22,
@@ -714,11 +999,31 @@ function App() {
             <p style={{ color: "#fecaca", fontSize: 12 }}>
               Severity: {failedService?.severity}
             </p>
+
+            <p style={{ color: "#fde68a", fontSize: 12 }}>
+              Source: {failedService?.source || "UNKNOWN"}
+            </p>
+
+            <p style={{ color: "#fde68a", fontSize: 12 }}>
+              Event ID: {failedService?.event_id || "none"}
+            </p>
           </div>
+
+          {analysisLoading.cascade && (
+            <p style={{ color: "#94a3b8", fontSize: 12 }}>
+              Loading failure cascade analysis...
+            </p>
+          )}
+
+          {analysisErrors.cascade && (
+            <p style={{ color: "#fca5a5", fontSize: 12 }}>
+              Cascade analysis error: {analysisErrors.cascade}
+            </p>
+          )}
 
           {cascade && (
             <>
-              <h3 style={{ marginTop: 22 }}>Cascade Impact</h3>
+              <h3 style={{ marginTop: 22 }}>Failure Cascade Analysis</h3>
 
               <div
                 style={{
@@ -794,6 +1099,7 @@ function App() {
                       <th>Impact</th>
                       <th>Criticality</th>
                       <th>Distance</th>
+                      <th>Source</th>
                       <th>Impact Score</th>
                     </tr>
                   </thead>
@@ -827,6 +1133,8 @@ function App() {
 
                         <td>{service.dependency_distance}</td>
 
+                        <td>{(service.failure_sources || ["UNKNOWN"]).join(", ")}</td>
+
                         <td>{service.impact_score}</td>
                       </tr>
                     ))}
@@ -846,12 +1154,109 @@ function App() {
               </p>
             </>
           )}
+
+          <h3 style={{ marginTop: 22 }}>Cascade Impact Analysis</h3>
+
+          {analysisLoading.impact && (
+            <p style={{ color: "#94a3b8", fontSize: 12 }}>
+              Loading cascade impact...
+            </p>
+          )}
+
+          {analysisErrors.impact && (
+            <p style={{ color: "#fca5a5", fontSize: 12 }}>
+              Cascade impact error: {analysisErrors.impact}
+            </p>
+          )}
+
+          {impactData && (
+            <>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))",
+                  gap: 12,
+                }}
+              >
+                {[
+                  [
+                    "Affected Services",
+                    impactData.summary?.total_affected_services,
+                  ],
+                  ["Direct Impact", impactData.summary?.directly_affected],
+                  ["Indirect Impact", impactData.summary?.indirectly_affected],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    style={{
+                      background: "#172033",
+                      borderRadius: 10,
+                      padding: 15,
+                    }}
+                  >
+                    <h2 style={{ margin: 0 }}>{value ?? 0}</h2>
+                    <p style={{ color: "#94a3b8", fontSize: 11 }}>{label}</p>
+                  </div>
+                ))}
+              </div>
+
+              <p style={{ color: "#fde68a", fontSize: 12 }}>
+                Sources:{" "}
+                {(impactData.active_failure_sources || ["UNKNOWN"]).join(", ")}
+                {" | "}Active failure IDs:{" "}
+                {(impactData.active_failure_ids || []).join(", ") || "none"}
+              </p>
+
+              <div style={{ overflowX: "auto" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: 12,
+                    textAlign: "left",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ color: "#94a3b8" }}>
+                      <th style={{ padding: 10 }}>Service</th>
+                      <th>Impact</th>
+                      <th>Criticality</th>
+                      <th>Distance</th>
+                      <th>Source</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(impactData.affected_services || []).map((service) => (
+                      <tr
+                        key={service.service_id}
+                        style={{ borderTop: "1px solid #263449" }}
+                      >
+                        <td style={{ padding: 10 }}>
+                          <strong>{service.name}</strong>
+                          <div style={{ color: "#64748b", fontSize: 10 }}>
+                            {service.service_id}
+                          </div>
+                        </td>
+                        <td>{service.impact_type}</td>
+                        <td>{service.criticality}</td>
+                        <td>{service.dependency_distance}</td>
+                        <td>
+                          {(service.failure_sources || ["UNKNOWN"]).join(", ")}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </section>
       )}
 
       {/* RECOVERY ADVISOR */}
 
-      {recovery && (
+      {(recovery || analysisLoading.recovery || analysisErrors.recovery) &&
+        displayedAnalysis && (
         <section
           style={{
             marginTop: 22,
@@ -865,6 +1270,18 @@ function App() {
             <ShieldCheck size={23} color="#38bdf8" />
             UPIShield Recovery Advisor
           </h2>
+
+          {analysisLoading.recovery && (
+            <p style={{ color: "#94a3b8", fontSize: 12 }}>
+              Loading recovery advisor...
+            </p>
+          )}
+
+          {analysisErrors.recovery && (
+            <p style={{ color: "#fca5a5", fontSize: 12 }}>
+              Recovery advisor error: {analysisErrors.recovery}
+            </p>
+          )}
 
           <div
             style={{
@@ -891,6 +1308,10 @@ function App() {
 
             <p style={{ fontSize: 13, lineHeight: 1.6 }}>
               {recoveryResult?.message}
+            </p>
+            <p style={{ fontSize: 11, color: "#fde68a" }}>
+              Source: {(recoveryResult?.failure_source || [failedService?.source || "UNKNOWN"]).join(", ")}
+              {" | "}Active failure IDs: {(recoveryResult?.active_failure_ids || []).join(", ") || "none"}
             </p>
           </div>
 

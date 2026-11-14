@@ -21,9 +21,12 @@ real payments.
 - `POST /failures/inject`
 - `POST /failures/{failure_id}/recover`
 - `GET /events/`
+- `GET /events/after?cursor_timestamp=&cursor_event_id=&limit=500`
 
-Failure and recovery events are persisted locally for future UPIShield
-delivery. They are not delivered to UPIShield by this application yet.
+Failure and recovery events are persisted locally for UPIShield polling. The
+incremental endpoint uses a stable timestamp and event-ID composite cursor.
+Recovery events include `related_event_id`, identifying the original failure
+event.
 
 ## Run
 

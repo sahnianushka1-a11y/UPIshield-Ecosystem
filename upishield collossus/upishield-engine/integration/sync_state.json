@@ -1,0 +1,909 @@
+{
+  "last_processed_event_id": "event-20261114085853452228",
+  "last_processed_timestamp": "2026-11-14T08:58:53.452228",
+  "last_sync_at": "2026-11-14T03:30:54.026261+00:00",
+  "processed_event_ids": [
+    "event-20261113191216800879",
+    "event-20261113191525107408",
+    "event-20261113191525226778",
+    "event-20261113191525298566",
+    "event-20261113191555666281",
+    "event-20261113191555774147",
+    "event-20261113193623426752",
+    "event-20261113193801396560",
+    "event-20261113200251744190",
+    "event-20261113200430596570",
+    "event-20261113200437449138",
+    "event-20261113200451617018",
+    "event-20261113231335531212",
+    "event-20261113231338205309",
+    "event-20261113231413953610",
+    "event-20261113231414187356",
+    "event-20261113231416701470",
+    "event-20261113231440756457",
+    "event-20261113232916612828",
+    "event-20261113233203424523",
+    "event-20261113233435848124",
+    "event-20261113233437645138",
+    "event-20261113233642620846",
+    "event-20261113234538833624",
+    "event-20261113234543980029",
+    "event-20261113234610083329",
+    "event-20261113235121175100",
+    "event-20261113235136247873",
+    "event-20261113235154375168",
+    "event-20261113235200687671",
+    "event-20261114000810735597",
+    "event-20261114000810888264",
+    "event-20261114000816183801",
+    "event-20261114001904531281",
+    "event-20261114001921659076",
+    "event-20261114003415820322",
+    "event-20261114003420981496",
+    "event-20261114003545445198",
+    "event-20261114003611938629",
+    "event-20261114003654585244",
+    "event-20261114004010497139",
+    "event-20261114004010564108",
+    "event-20261114004027382840",
+    "event-20261114004043148826",
+    "event-20261114004105949849",
+    "event-20261114004217068421",
+    "event-20261114004218899527",
+    "event-20261114005033797712",
+    "event-20261114005038991198",
+    "event-20261114005044161182",
+    "event-20261114005049316747",
+    "event-20261114011240947941",
+    "event-20261114083045633873",
+    "event-20261114083833999286",
+    "event-20261114083908286975",
+    "event-20261114083936691003",
+    "event-20261114085246665274",
+    "event-20261114085402365403",
+    "event-20261114085453093808",
+    "event-20261114085618236850",
+    "event-20261114085752525245",
+    "event-20261114085828508114",
+    "event-20261114085828632028",
+    "event-20261114085853452228"
+  ],
+  "event_log": [
+    {
+      "event_id": "event-20261113191216800879",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T19:12:16.800879",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113191216800879",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:05:02.240722+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261113191525107408",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T19:15:25.107408",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113191525226778",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T19:15:25.226778",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113191525226778",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:05:06.895825+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261113191525298566",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T19:15:25.298566",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113191555666281",
+      "event_type": "API_FAILURE",
+      "service": "AUTH_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T19:15:55.666281",
+      "result": "SKIPPED",
+      "reason": "No UPIShield graph mapping for Banker service AUTH_API"
+    },
+    {
+      "event_id": "event-20261113191555774147",
+      "event_type": "API_RECOVERY",
+      "service": "AUTH_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T19:15:55.774147",
+      "result": "SKIPPED",
+      "reason": "No UPIShield graph mapping for Banker service AUTH_API"
+    },
+    {
+      "event_id": "event-20261113193623426752",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T19:36:23.427436",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113193623426752",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:05:16.209797+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261113193801396560",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T19:38:01.396560",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113200251744190",
+      "event_type": "API_FAILURE",
+      "service": "AUTH_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T20:02:51.745201",
+      "result": "SKIPPED",
+      "reason": "No UPIShield graph mapping for Banker service AUTH_API"
+    },
+    {
+      "event_id": "event-20261113200430596570",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T20:04:30.596570",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113200430596570",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:05:23.244824+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261113200437449138",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T20:04:37.449138",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113200451617018",
+      "event_type": "API_RECOVERY",
+      "service": "AUTH_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T20:04:51.617018",
+      "result": "SKIPPED",
+      "reason": "No UPIShield graph mapping for Banker service AUTH_API"
+    },
+    {
+      "event_id": "event-20261113231335531212",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:13:35.531212",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113231335531212",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:05:30.339312+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261113231338205309",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:13:38.206035",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113231413953610",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:14:13.953610",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113231413953610",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:05:35.028428+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261113231414187356",
+      "event_type": "API_FAILURE",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:14:14.187356",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113231414187356",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:05:37.378760+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261113231416701470",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:14:16.701470",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113231440756457",
+      "event_type": "API_RECOVERY",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:14:40.756457",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113232916612828",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:29:16.612828",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113232916612828",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:05:44.678335+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261113233203424523",
+      "event_type": "API_FAILURE",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:32:03.425518",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113233203424523",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:05:46.993772+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261113233435848124",
+      "event_type": "API_RECOVERY",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:34:35.848124",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113233437645138",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:34:37.645138",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113233642620846",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:36:42.620846",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113233642620846",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:05:53.929108+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261113234538833624",
+      "event_type": "API_FAILURE",
+      "service": "UPI_GATEWAY",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:45:38.833624",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113234538833624",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:05:56.238629+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261113234543980029",
+      "event_type": "API_RECOVERY",
+      "service": "UPI_GATEWAY",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:45:43.980029",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113234610083329",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:46:10.083329",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113235121175100",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:51:21.175100",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113235121175100",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:06:03.210596+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261113235136247873",
+      "event_type": "API_FAILURE",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:51:36.247873",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113235136247873",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:06:05.524486+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261113235154375168",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:51:54.375168",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261113235200687671",
+      "event_type": "API_RECOVERY",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-13T23:52:00.687671",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114000810735597",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:08:10.736644",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114000810735597",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:06:12.506264+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261114000810888264",
+      "event_type": "API_FAILURE",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:08:10.888264",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114000810888264",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:06:14.835098+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261114000816183801",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:08:16.183801",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114001904531281",
+      "event_type": "API_RECOVERY",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:19:04.531281",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114001921659076",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:19:21.659076",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114001921659076",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:06:21.859200+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261114003415820322",
+      "event_type": "API_FAILURE",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:34:15.820322",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114003415820322",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:06:24.225630+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261114003420981496",
+      "event_type": "API_RECOVERY",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:34:20.981496",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114003545445198",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:35:45.445198",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114003611938629",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:36:11.938629",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114003611938629",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:06:32.314765+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261114003654585244",
+      "event_type": "API_FAILURE",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:36:54.585244",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114003654585244",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:06:35.092000+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261114004010497139",
+      "event_type": "API_RECOVERY",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:40:10.497139",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114004010564108",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:40:10.564108",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114004027382840",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:40:27.382840",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114004027382840",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:06:43.244244+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261114004043148826",
+      "event_type": "API_FAILURE",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:40:43.148826",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114004043148826",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:06:45.973183+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261114004105949849",
+      "event_type": "API_RECOVERY",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:41:05.949849",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114004217068421",
+      "event_type": "API_RECOVERY",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:42:17.068421",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114004218899527",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:42:18.899527",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114005033797712",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:50:33.798562",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114005033797712",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:06:56.749212+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261114005038991198",
+      "event_type": "API_FAILURE",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:50:38.991198",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114005038991198",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:06:59.372983+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261114005044161182",
+      "event_type": "API_RECOVERY",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:50:44.161182",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114005049316747",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T00:50:49.316747",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114011240947941",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T01:12:40.947941",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114011240947941",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:07:07.211190+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261114083045633873",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T08:30:45.633873",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114083833999286",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T08:38:33.999286",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114083908286975",
+      "event_type": "API_FAILURE",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T08:39:08.286975",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114083936691003",
+      "event_type": "API_RECOVERY",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T08:39:36.691003",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114085246665274",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T08:52:46.665274",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114085402365403",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T08:54:02.365403",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114085453093808",
+      "event_type": "API_FAILURE",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T08:54:53.094805",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114085618236850",
+      "event_type": "API_RECOVERY",
+      "service": "BANK_DB",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T08:56:18.236850",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114085752525245",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T08:57:52.525245",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114085828508114",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T08:58:28.508114",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114085828508114",
+      "event_type": "BANKER_STATE_RECONCILIATION",
+      "service": "BANKER",
+      "source": "BANKER_STATUS",
+      "timestamp": "2026-11-14T03:28:35.497803+00:00",
+      "result": "PROCESSED",
+      "reason": "Removed failures no longer active in Banker"
+    },
+    {
+      "event_id": "event-20261114085828632028",
+      "event_type": "API_RECOVERY",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T08:58:28.632028",
+      "result": "PROCESSED",
+      "reason": null
+    },
+    {
+      "event_id": "event-20261114085853452228",
+      "event_type": "API_FAILURE",
+      "service": "PAYMENT_API",
+      "source": "BANKER_SIMULATOR",
+      "timestamp": "2026-11-14T08:58:53.452228",
+      "result": "PROCESSED",
+      "reason": null
+    }
+  ],
+  "active_failures": {
+    "event-20261114085853452228": {
+      "service": "PAYMENT_API",
+      "status": "DOWN",
+      "failure_type": "API_UNAVAILABLE",
+      "event_type": "API_FAILURE",
+      "recorded_at": "2026-11-14T03:28:54.939562+00:00",
+      "graph_service": "payment_gateway",
+      "source": "BANKER_APP",
+      "event_source": "BANKER_SIMULATOR"
+    }
+  },
+  "skipped_events": [
+    {
+      "event_id": "event-20261113191555666281",
+      "reason": "No UPIShield graph mapping for Banker service AUTH_API",
+      "skipped_at": "2026-11-14T03:05:09.218050+00:00"
+    },
+    {
+      "event_id": "event-20261113191555774147",
+      "reason": "No UPIShield graph mapping for Banker service AUTH_API",
+      "skipped_at": "2026-11-14T03:05:11.558925+00:00"
+    },
+    {
+      "event_id": "event-20261113200251744190",
+      "reason": "No UPIShield graph mapping for Banker service AUTH_API",
+      "skipped_at": "2026-11-14T03:05:18.566962+00:00"
+    },
+    {
+      "event_id": "event-20261113200451617018",
+      "reason": "No UPIShield graph mapping for Banker service AUTH_API",
+      "skipped_at": "2026-11-14T03:05:25.611610+00:00"
+    }
+  ],
+  "last_error": null
+}

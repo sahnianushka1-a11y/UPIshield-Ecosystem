@@ -39,6 +39,8 @@ class Transaction(Base):
     status = Column(String, nullable=False, default="PENDING") # PENDING | PROCESSING | SUCCESS | FAILED | UNKNOWN
     route = Column(String, nullable=False, default="UPI")      # UPI | NEFT | IMPS
     failure_reason = Column(Text, nullable=True, default=None)
+    idempotency_key = Column(String, nullable=True, unique=True, index=True)
+    description = Column(Text, nullable=True, default="")
 
 
 class InfrastructureService(Base):
@@ -67,6 +69,7 @@ class Failure(Base):
     status = Column(String, nullable=False, default="ACTIVE")  # ACTIVE | RECOVERED
     injected_at = Column(DateTime, nullable=False)
     recovered_at = Column(DateTime, nullable=True, default=None)
+    integration_event_id = Column(String, nullable=True, index=True)
 
 
 class ActivityEvent(Base):
@@ -103,3 +106,4 @@ class IntegrationEvent(Base):
     failure_type = Column(String, nullable=True)
     timestamp = Column(DateTime, nullable=False)
     source = Column(String, nullable=False, default="BANKER_SIMULATOR")
+    related_event_id = Column(String, nullable=True, index=True)

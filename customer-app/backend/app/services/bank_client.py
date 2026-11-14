@@ -1,8 +1,7 @@
 """
 Single reusable gateway to the Bank backend.
 
-Real endpoints are NOT invented. Fill BANK_ENDPOINTS and the request/response mapping
-only after the Bank developer confirms the contract.
+The Banker backend exposes a customer-facing contract under /customer-api.
 """
 import logging
 
@@ -14,14 +13,13 @@ from app.services import mock_bank
 
 logger = logging.getLogger("customer_app.bank")
 
-# TODO: fill from the agreed Bank API contract. None = not yet agreed.
 BANK_ENDPOINTS = {
-    "login": None,
-    "profile": None,
-    "balance": None,
-    "transactions": None,
-    "submit_payment": None,
-    "payment_status": None,  # must support lookup by idempotency key and/or transaction ID
+    "login": "/customer-api/login",
+    "profile": "/customer-api/profile",
+    "balance": "/customer-api/balance",
+    "transactions": "/customer-api/transactions",
+    "submit_payment": "/customer-api/payments",
+    "payment_status": "/customer-api/payments/{key}",
 }
 
 
@@ -36,30 +34,54 @@ class RealBankClient:
         )
 
     def _require(self, name: str):
-        if not BANK_ENDPOINTS.get(name):
-            raise HTTPException(
-                status_code=501,
-                detail=f"Bank endpoint '{name}' is not configured yet (contract pending).",
-            )
-        raise NotImplementedError(f"Map request/response fields for '{name}' from the contract.")
+        endpoint = BANK_ENDPOINTS.get(name)
+        if not endpoint:
+            raise HTTPException(status_code=501, detail=f"Bank endpoint '{name}' is not configured.")
+        return endpoint
+
+    async def _request(self, method: str, endpoint: str, token: str | None = None, **kwargs):
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+        try:
+            response = await self._http.request(method, endpoint, headers=headers, **kwargs)
+        except httpx.TimeoutException as exc:
+            raise BankTimeout() from exc
+        if response.status_code >= 400:
+            detail = response.json().get("detail", "Bank request failed")
+            raise HTTPException(response.status_code, detail)
+        return response.json()
 
     async def login(self, customer_id: str, password: str) -> dict:
-        self._require("login")
+        return await self._request(
+            "POST", self._require("login"),
+            json={"customer_id": customer_id, "password": password},
+        )
 
     async def get_profile(self, token: str) -> dict:
-        self._require("profile")
+        return await self._request("GET", self._require("profile"), token)
 
     async def get_balance(self, token: str) -> dict:
-        self._require("balance")
+        return await self._request("GET", self._require("balance"), token)
 
     async def list_transactions(self, token: str, limit: int) -> list:
-        self._require("transactions")
+        return (await self._request("GET", self._require("transactions"), token))[:limit]
 
     async def submit_payment(self, token, key, recipient_id, amount_paise, description) -> dict:
-        self._require("submit_payment")
+        result = await self._request(
+            "POST", self._require("submit_payment"), token,
+            json={"idempotency_key": key, "recipient_id": recipient_id,
+                  "amount_paise": amount_paise, "description": description},
+        )
+        return {
+            "transaction_id": result["transaction_id"],
+            "status": result["status"],
+            "failure_reason": result.get("failure_reason"),
+            "duplicate": result.get("duplicate", False),
+        }
 
     async def get_payment_status(self, token: str, key: str) -> dict:
-        self._require("payment_status")
+        return await self._request(
+            "GET", self._require("payment_status").format(key=key), token
+        )
 
 
 class MockBankClient:

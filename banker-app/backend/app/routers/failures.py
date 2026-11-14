@@ -96,13 +96,16 @@ async def inject_failure(data: FailureInject, db: Session = Depends(get_db)):
     )
 
     add_activity_event(db, "alert", f"Failure injected: {service_name} — {data.failure_type}")
-    create_integration_event(
+    integration_event = create_integration_event(
         db,
         "API_FAILURE",
         data.service_id.upper().replace("-", "_"),
         infra_status,
         data.failure_type,
     )
+    failure.integration_event_id = integration_event.id
+    db.commit()
+    db.refresh(failure)
     return failure
 
 
@@ -132,6 +135,7 @@ async def recover_failure_endpoint(failure_id: str, db: Session = Depends(get_db
         failure.service_id.upper().replace("-", "_"),
         "OPERATIONAL",
         failure.failure_type,
+        related_event_id=failure.integration_event_id,
     )
     return failure
 

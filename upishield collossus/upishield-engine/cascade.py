@@ -20,7 +20,7 @@ CRITICALITY_WEIGHTS = {
 # CASCADE FAILURE ANALYSIS
 # ==========================================
 
-def analyze_cascade(failed_service):
+def analyze_cascade(failed_service, active_failures=None):
 
     # Check whether the failed service exists
     if failed_service not in bank_graph:
@@ -46,6 +46,11 @@ def analyze_cascade(failed_service):
     indirect_count = 0
 
     affected_customer_apps = []
+    active_failures = active_failures or []
+    related_failures = [
+        failure for failure in active_failures
+        if (failure.get("graph_service") or failure.get("service_id")) == failed_service
+    ]
 
     # ==========================================
     # ANALYSE EACH AFFECTED SERVICE
@@ -112,6 +117,31 @@ def analyze_cascade(failed_service):
             "dependency_path": path
         })
 
+        impacting_failures = [
+            failure for failure in active_failures
+            if (
+                failure.get("graph_service") or failure.get("service_id")
+            ) in bank_graph
+            and service_id in nx.ancestors(
+                bank_graph,
+                failure.get("graph_service") or failure.get("service_id"),
+            )
+        ]
+        if impacting_failures:
+            affected_details[-1]["failure_sources"] = sorted({
+                failure.get("source", "UNKNOWN")
+                for failure in impacting_failures
+            })
+            affected_details[-1]["active_failure_ids"] = [
+                failure.get("event_id") or failure.get("failure_id")
+                for failure in impacting_failures
+            ]
+            affected_details[-1]["impact_reason"] = (
+                "Depends directly on an active failed service"
+                if distance == 1
+                else "Depends indirectly on one or more active failed services"
+            )
+
     # ==========================================
     # SORT BY MOST IMMEDIATE IMPACT
     # ==========================================
@@ -162,7 +192,15 @@ def analyze_cascade(failed_service):
         "failed_service": {
             "service_id": failed_service,
             "name": failed_node["name"],
-            "criticality": failed_criticality
+            "criticality": failed_criticality,
+            "source": sorted({
+                failure.get("source", "UNKNOWN")
+                for failure in related_failures
+            }) or ["UNKNOWN"],
+            "active_failure_ids": [
+                failure.get("event_id") or failure.get("failure_id")
+                for failure in related_failures
+            ],
         },
 
         "cascade_severity": cascade_severity,
@@ -183,4 +221,55 @@ def analyze_cascade(failed_service):
         "affected_customer_apps": affected_customer_apps,
 
         "affected_services": affected_details
+    }
+
+
+def analyze_active_failures(active_failures):
+    """Return one de-duplicated impact report for all active failures."""
+    reports = [
+        analyze_cascade(
+            failure.get("graph_service") or failure.get("service_id"),
+            active_failures,
+        )
+        for failure in active_failures
+        if (failure.get("graph_service") or failure.get("service_id")) in bank_graph
+    ]
+    merged = {}
+    for report in reports:
+        for service in report.get("affected_services", []):
+            current = merged.get(service["service_id"])
+            if current is None or service["dependency_distance"] < current["dependency_distance"]:
+                merged[service["service_id"]] = dict(service)
+            else:
+                current["failure_sources"] = sorted(set(
+                    current.get("failure_sources", [])
+                    + service.get("failure_sources", [])
+                ))
+                current["active_failure_ids"] = sorted(set(
+                    current.get("active_failure_ids", [])
+                    + service.get("active_failure_ids", [])
+                ))
+
+    affected = sorted(
+        merged.values(),
+        key=lambda item: (item["dependency_distance"], -item["impact_score"]),
+    )
+    direct = sum(item["impact_type"] == "DIRECT" for item in affected)
+    indirect = len(affected) - direct
+    return {
+        "success": True,
+        "analysis": "ACTIVE_FAILURE_IMPACT_COMPLETED",
+        "active_failure_ids": [
+            failure.get("event_id") or failure.get("failure_id")
+            for failure in active_failures
+        ],
+        "active_failure_sources": sorted({
+            failure.get("source", "UNKNOWN") for failure in active_failures
+        }),
+        "summary": {
+            "total_affected_services": len(affected),
+            "directly_affected": direct,
+            "indirectly_affected": indirect,
+        },
+        "affected_services": affected,
     }

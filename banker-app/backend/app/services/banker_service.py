@@ -76,7 +76,14 @@ def update_customer_status(db: Session, customer_id: str, status: str) -> Custom
     return customer
 
 
-def create_integration_event(db: Session, event_type: str, service: str, status: str, failure_type: str | None = None) -> IntegrationEvent:
+def create_integration_event(
+    db: Session,
+    event_type: str,
+    service: str,
+    status: str,
+    failure_type: str | None = None,
+    related_event_id: str | None = None,
+) -> IntegrationEvent:
     event = IntegrationEvent(
         id=f"event-{datetime.now().strftime('%Y%m%d%H%M%S%f')}",
         event_type=event_type,
@@ -85,6 +92,7 @@ def create_integration_event(db: Session, event_type: str, service: str, status:
         failure_type=failure_type,
         timestamp=datetime.now(),
         source="BANKER_SIMULATOR",
+        related_event_id=related_event_id,
     )
     db.add(event)
     db.commit()
